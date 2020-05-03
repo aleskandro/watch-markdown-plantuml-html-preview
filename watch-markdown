@@ -5,10 +5,18 @@ CONF_DIR="$HOME/.watch-markdown"
 qutebrowser /tmp/out.html &
 
 [ -e styles.css ] || ( pygmentize -S default -f html -a .codehilite ; cat $CONF_DIR/md.css ; ) >> styles.css
-
-inotifywait -m -r ./ -e close_write |
+LAST_FILE=""
+LAST_ACTION=""
+LAST_DIR=""
+inotifywait -m -r ./ -e close_write,access |
     while read DIR ACTION FILE; do
+        if [ "$LAST_FILE" = "$FILE" -a "$LAST_ACTION" = "$ACTION" -a "$LAST_DIR" = "$LAST_DIR" ]; then
+            continue
+        fi
         if [[ "$FILE" =~ .*(\.md)$ ]]; then
+            LAST_FILE=$FILE
+            LAST_ACTION=$ACTION
+            LAST_DIR=$DIR
             echo $DIR $ACTION $FILE
             echo -e "\e[32mPDF PYTHON MARKDOWN RUNNING\e[0m"
             markdown_py -x plantuml_markdown -x tables -x toc -x extra -x codehilite -x meta -x smarty \
