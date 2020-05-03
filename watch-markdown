@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONF_DIR="~/.watch-markdown"
+CONF_DIR="$HOME/.watch-markdown"
 
 qutebrowser /tmp/out.html &
 
