@@ -1,0 +1,28 @@
+#!/bin/bash
+
+CONF_DIR="~/.watch-markdown"
+
+qutebrowser /tmp/out.html &
+
+[ -e styles.css ] || ( pygmentize -S default -f html -a .codehilite ; cat $CONF_DIR/md.css ; ) >> styles.css
+
+inotifywait -m -r ./ -e close_write -e delete |
+    while read DIR ACTION FILE; do
+        if [[ "$FILE" =~ .*(\.md)$ ]]; then
+            echo $DIR $ACTION $FILE
+            echo -e "\e[32mPDF PYTHON MARKDOWN RUNNING\e[0m"
+            markdown_py -x plantuml_markdown -x tables -x toc -x extra -x codehilite -x meta -x smarty \
+                -x wikilinks -x admonition -x markdown_checklist.extension \
+                -c $CONF_DIR/config.yml \
+                ${DIR}${FILE} > /tmp/out.html
+            echo -e "\e[31mPDF APPENDING CSS\e[0m"
+            cat >> /tmp/out.html <<- EOF
+			<style>
+			$(cat styles.css)
+			</style>
+			EOF
+            echo -e "\e[39mPDF RELOADING BROWSER\e[0m"
+            qutebrowser :reload
+        fi
+    done
+
