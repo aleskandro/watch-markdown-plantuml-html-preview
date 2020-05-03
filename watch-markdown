@@ -6,7 +6,7 @@ qutebrowser /tmp/out.html &
 
 [ -e styles.css ] || ( pygmentize -S default -f html -a .codehilite ; cat $CONF_DIR/md.css ; ) >> styles.css
 
-inotifywait -m -r ./ -e close_write -e delete |
+inotifywait -m -r ./ -e close_write |
     while read DIR ACTION FILE; do
         if [[ "$FILE" =~ .*(\.md)$ ]]; then
             echo $DIR $ACTION $FILE
